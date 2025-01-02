@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using DG.Tweening;
 using System.Collections.Generic;
 using System.Collections;
+using System;
 
 public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPointerDownHandler, IPointerClickHandler
 {
@@ -28,7 +29,11 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
     private float lastClickTime = 0f; 
     private float doubleClickThreshold = 0.3f;
 
-    private string tweenId; // Unique ID for DOTween
+    public string tweenId; // Unique ID for DOTween
+
+    private CardMovement lastReorderedCard = null; 
+    private float lastReorderTime = -Mathf.Infinity;
+    private float reorderCooldown = 0.2f;
 
     private void Awake()
     {
@@ -88,6 +93,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
 
 
                 // Call UpdateHand after animations are completed
+                handManager.UpdateHand();
             });
 
     }
@@ -227,6 +233,9 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
 
             // Kill any active tweens to prevent conflicts
             DOTween.Kill(tweenId);
+
+            lastReorderedCard = null;
+            lastReorderTime = -Mathf.Infinity;
         }
     }
 
@@ -250,17 +259,62 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
                 rectTransform.localPosition = originalPanelLocalPosition
                     + (Vector3)(localPointerPosition - originalLocalPointerPosition);
 
-                // Example: If drag up above some Y threshold => currentState = 3
-                /*
-                if (rectTransform.localPosition.y > cardPlay.y)
+                BoxCollider2D centerCollider = GetComponent<BoxCollider2D>();
+                if (centerCollider != null)
                 {
-                    currentState = 3;
-                    DOTween.Kill(tweenId);
-                    rectTransform.DOLocalMove(playPosition, 0.3f)
-                               .SetEase(Ease.OutQuad)
-                               .SetId(tweenId);
-                }*/
+                    Vector2 boxCenter = centerCollider.bounds.center;
+                    Vector2 boxSize = centerCollider.bounds.size;
+
+                    Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, boxSize, 0f);
+                    foreach (Collider2D hit in hits)
+                    {
+                        if (hit.gameObject == this.gameObject)
+                            continue;
+                        CardMovement otherCard = hit.GetComponentInParent<CardMovement>();
+                        if (otherCard != null && otherCard != this)
+                        {
+                            if (otherCard == lastReorderedCard)
+                                continue;
+
+                            if (Time.time - lastReorderTime < reorderCooldown)
+                                continue;
+
+                            ReorderCardInHand(otherCard);
+                            lastReorderedCard = otherCard;
+                            lastReorderTime = Time.time;
+                            break;
+                        }
+                    }    
+                }
             }
+        }
+    }
+
+    private void ReorderCardInHand(CardMovement otherCard)
+    {
+        int myIndex = handManager.cardsInHand.IndexOf(this.gameObject);
+        int otherIndex = handManager.cardsInHand.IndexOf(otherCard.gameObject);
+
+        if (myIndex < 0 || otherIndex < 0) return;
+
+        if (myIndex < otherIndex)
+        {
+            handManager.cardsInHand.RemoveAt(myIndex);
+            otherIndex = handManager.cardsInHand.IndexOf(otherCard.gameObject);
+
+            int newIndex = Mathf.Min(otherIndex + 1, handManager.cardsInHand.Count);
+            handManager.cardsInHand.Insert(newIndex, this.gameObject);
+
+            handManager.UpdateHand();
+        }
+        else if (myIndex > otherIndex)
+        {
+            handManager.cardsInHand.RemoveAt(myIndex);
+            otherIndex = handManager.cardsInHand.IndexOf(otherCard.gameObject);
+
+            int newIndex = Mathf.Max(otherIndex, 0);
+            handManager.cardsInHand.Insert(newIndex, this.gameObject);
+            handManager.UpdateHand();
         }
     }
 
@@ -283,9 +337,10 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
         else
         {
             // Otherwise, just return to your idle state
-            transform.SetSiblingIndex(siblingIndex);
+            //transform.SetSiblingIndex(siblingIndex);
             TransitionToState0();
         }
+        lastReorderedCard = null;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -336,9 +391,9 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
         return (transform.parent == handManager.deckPilePos);
     }
 
-    private bool IsInHand()
+    public bool IsDragging()
     {
-        return (transform.parent == handManager.handTransform);
+        return (currentState == 2);
     }
 
     private bool IsTopCardInDeck()

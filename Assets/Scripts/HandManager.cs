@@ -107,6 +107,19 @@ public class HandManager : MonoBehaviour
 
         for (int i = 0; i < cardCount; i++)
         {
+
+            GameObject cardObj = cardsInHand[i];
+            CardMovement cardMovement = cardObj.GetComponent<CardMovement>();
+
+            // If this card is currently being dragged, skip layout
+            if (cardMovement != null && cardMovement.IsDragging())
+            {
+                Debug.Log("Card object: " + cardObj);
+                // DO NOT tween or reposition this card; it's manually controlled.
+                continue;
+            }
+
+
             // Calculate rotation
             float rotationAngle = fanSpread * (i - (cardCount - 1) / 2f);
             Vector3 newRotation = new Vector3(0f, 0f, rotationAngle);
@@ -122,12 +135,15 @@ public class HandManager : MonoBehaviour
             // Animate the card's position and rotation
             Transform cardTransform = cardsInHand[i].transform;
             cardTransform.SetSiblingIndex(i);
-            cardTransform.DOLocalMove(newLocalPos, tweenDuration).SetEase(Ease.OutQuad);
-            cardTransform.DOLocalRotate(newRotation, tweenDuration).SetEase(Ease.OutQuad);
-            cardTransform.DOScale(new Vector3(100,100,0), tweenDuration).SetEase(Ease.OutQuad);
-
-            //CardMovement cm = cardTransform.GetComponent<CardMovement>();
-            //cm.UpdateOriginalToCurrent();
+            cardTransform.DOLocalMove(newLocalPos, tweenDuration).SetEase(Ease.OutQuad)
+                .SetId(cardObj.GetComponent<CardMovement>().tweenId)
+                .OnComplete(() => cardMovement.UpdateOriginalToCurrent());
+            cardTransform.DOLocalRotate(newRotation, tweenDuration).SetEase(Ease.OutQuad)
+                .SetId(cardObj.GetComponent<CardMovement>().tweenId)
+                .OnComplete(() => cardMovement.UpdateOriginalToCurrent());
+            cardTransform.DOScale(new Vector3(100, 100, 1), tweenDuration).SetEase(Ease.OutQuad)
+                .SetId(cardObj.GetComponent<CardMovement>().tweenId)
+                .OnComplete(() => cardMovement.UpdateOriginalToCurrent());
 
         }
 
