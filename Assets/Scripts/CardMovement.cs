@@ -19,6 +19,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
     private DiscardManager discardManager;
     private bool isInsideDiscardZone = false;
     private bool isHovering = false;
+    private int siblingIndex;
 
     [SerializeField] private float selectScale = 1.1f;
     [SerializeField] private Vector2 cardPlay;
@@ -65,18 +66,19 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
         currentState = 0;
 
         // Kill all tweens for this object before starting new ones
-        DOTween.Kill(tweenId);   
+        DOTween.Kill(tweenId);
 
         // Smooth transition back to the original state
-        rectTransform.DOLocalMove(originalPosition, 0.3f)
+        Debug.Log("Moving to originalposition: " + originalPosition);
+        rectTransform.DOLocalMove(originalPosition, 0.1f)
             .SetEase(Ease.OutBack)
             .SetId(tweenId);
 
-        rectTransform.DOLocalRotateQuaternion(originalRotation, 0.3f)
+        rectTransform.DOLocalRotateQuaternion(originalRotation, 0.1f)
             .SetEase(Ease.OutBack)
             .SetId(tweenId);
 
-        rectTransform.DOScale(originalScale, 0.3f)
+        rectTransform.DOScale(originalScale, 0.1f)
             .SetEase(Ease.OutBack)
             .SetId(tweenId)
             .OnComplete(() =>
@@ -84,9 +86,10 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
                 // Ensure the scale is reset correctly
                 rectTransform.localScale = new Vector3(100, 100, 1);
 
+
                 // Call UpdateHand after animations are completed
-                //handManager.UpdateHand();
             });
+
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -161,7 +164,9 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
         bool isInDeck = (transform.parent == handManager.deckPilePos);
         if (currentState == 0 && !isInDeck)
         {
+            Debug.Log($"Setting original positon from: {originalPosition}");
             originalPosition = rectTransform.localPosition;
+            Debug.Log($"Setting original positon to: {originalPosition}");
             originalRotation = rectTransform.localRotation;
             //originalScale = rectTransform.localScale;
 
@@ -176,7 +181,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
         isHovering = false;
         // The same logic you had for OnPointerExit
         // e.g., if we were hovering, transition to state 0
-        DOTween.Kill(tweenId);
+        //DOTween.Kill(tweenId);
         if (currentState == 1)
         {
             TransitionToState0();
@@ -202,6 +207,8 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
                 return;
             }
         }
+
+        siblingIndex = transform.GetSiblingIndex();
 
         transform.SetAsLastSibling();
 
@@ -276,6 +283,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
         else
         {
             // Otherwise, just return to your idle state
+            transform.SetSiblingIndex(siblingIndex);
             TransitionToState0();
         }
     }
