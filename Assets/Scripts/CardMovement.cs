@@ -22,6 +22,9 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
     private bool isHovering = false;
     private int siblingIndex;
 
+    private Quaternion newRotation;
+    private Vector3 newPosition;
+
     [SerializeField] private float selectScale = 1.1f;
     [SerializeField] private Vector2 cardPlay;
     [SerializeField] private Vector3 playPosition;
@@ -68,34 +71,60 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
     private void TransitionToState0()
     {
 
-        currentState = 0;
 
         // Kill all tweens for this object before starting new ones
         DOTween.Kill(tweenId);
 
         // Smooth transition back to the original state
         Debug.Log("Moving to originalposition: " + originalPosition);
-        rectTransform.DOLocalMove(originalPosition, 0.1f)
+        
+        if (currentState == 2)
+        {
+            rectTransform.DOLocalMove(newPosition, 0.1f)
             .SetEase(Ease.OutBack)
             .SetId(tweenId);
 
-        rectTransform.DOLocalRotateQuaternion(originalRotation, 0.1f)
-            .SetEase(Ease.OutBack)
-            .SetId(tweenId);
+            rectTransform.DOLocalRotateQuaternion(newRotation, 0.1f)
+                .SetEase(Ease.OutBack)
+                .SetId(tweenId);
 
-        rectTransform.DOScale(originalScale, 0.1f)
-            .SetEase(Ease.OutBack)
-            .SetId(tweenId)
-            .OnComplete(() =>
-            {
+            rectTransform.DOScale(originalScale, 0.1f)
+                .SetEase(Ease.OutBack)
+                .SetId(tweenId)
+                .OnComplete(() =>
+                {
                 // Ensure the scale is reset correctly
                 rectTransform.localScale = new Vector3(100, 100, 1);
 
 
                 // Call UpdateHand after animations are completed
                 handManager.UpdateHand();
-            });
+                });
+        }
+        else
+        {
+            rectTransform.DOLocalMove(originalPosition, 0.1f)
+                .SetEase(Ease.OutBack)
+                .SetId(tweenId);
 
+            rectTransform.DOLocalRotateQuaternion(originalRotation, 0.1f)
+                .SetEase(Ease.OutBack)
+                .SetId(tweenId);
+
+            rectTransform.DOScale(originalScale, 0.1f)
+                .SetEase(Ease.OutBack)
+                .SetId(tweenId)
+                .OnComplete(() =>
+                {
+                // Ensure the scale is reset correctly
+                rectTransform.localScale = new Vector3(100, 100, 1);
+
+
+                // Call UpdateHand after animations are completed
+                handManager.UpdateHand();
+                });
+        }
+        currentState = 0;
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -338,6 +367,8 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
         }
         else
         {
+            newPosition = rectTransform.localPosition;
+            newRotation = rectTransform.localRotation;
             // Otherwise, just return to your idle state
             //transform.SetSiblingIndex(siblingIndex);
             TransitionToState0();
