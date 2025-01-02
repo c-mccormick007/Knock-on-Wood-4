@@ -30,7 +30,7 @@ public class DeckManager : MonoBehaviour
             deckPile.AddCardToDeckPile(card);
             yield return new WaitForSeconds(0.05f); // Adjust delay as needed
         }
-
+        yield return new WaitForSeconds(1f);
         // Once the deck is built, deal cards to the hand
         HandManager hand = FindFirstObjectByType<HandManager>();
         for (int i = 0; i < 10; i++)

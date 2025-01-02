@@ -26,8 +26,9 @@ public class DeckPile : MonoBehaviour
 
         // Offset the card's initial local position slightly
         RectTransform rectTransform = newCard.GetComponent<RectTransform>();
-        rectTransform.localPosition = new Vector3(600, -500, 0); 
+        rectTransform.localPosition = new Vector3(600, -500, -1800); 
         rectTransform.localRotation = Quaternion.Euler(180,180,0);
+        rectTransform.localScale = new Vector3(200, 200, 1);
 
         CardDisplay cardDisplay = newCard.GetComponent<CardDisplay>();
         cardDisplay.cardData = card;
@@ -35,6 +36,7 @@ public class DeckPile : MonoBehaviour
         //rectTransform.localPosition = new Vector3(0, 1 * deck.Count, 1 * deck.Count);
         rectTransform.DOLocalMove(new Vector3(0, 1 * deck.Count, 1 * deck.Count), 0.5f).SetEase(Ease.OutQuad);
         rectTransform.DOLocalRotate(new Vector3(0,0,0), 0.9f).SetEase(Ease.OutQuad);
+        rectTransform.DOScale(new Vector3(100, 100, 1), 0.9f).SetEase(Ease.OutQuad);
         deckObjects.Add(newCard);
 
     }

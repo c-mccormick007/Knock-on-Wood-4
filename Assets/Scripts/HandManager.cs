@@ -47,7 +47,18 @@ public class HandManager : MonoBehaviour
     private IEnumerator CardToHandCoroutine(GameObject card)
     {
         // Target position for the card in the hand
-        Vector3 handPosition = handTransform.position;
+        int cardsInHandCount = cardsInHand.Count;
+        float dealOffset = 0f;
+        if (cardsInHandCount > 0 && cardsInHandCount  < 5)
+        {
+            dealOffset = cardsInHandCount * 75;
+        }
+        else if (cardsInHandCount >= 5)
+        {
+            dealOffset = 336;
+        }
+
+        Vector3 handPosition = handTransform.position + new Vector3(dealOffset, 0,0);
 
         // Duration for the movement and flip
         float duration = 0.2f;
