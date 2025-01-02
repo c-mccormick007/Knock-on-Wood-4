@@ -85,7 +85,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
                 rectTransform.localScale = new Vector3(100, 100, 1);
 
                 // Call UpdateHand after animations are completed
-                handManager.UpdateHand();
+                //handManager.UpdateHand();
             });
     }
 

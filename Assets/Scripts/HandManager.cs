@@ -126,8 +126,8 @@ public class HandManager : MonoBehaviour
             cardTransform.DOLocalRotate(newRotation, tweenDuration).SetEase(Ease.OutQuad);
             cardTransform.DOScale(new Vector3(100,100,0), tweenDuration).SetEase(Ease.OutQuad);
 
-            CardMovement cm = cardTransform.GetComponent<CardMovement>();
-            cm.UpdateOriginalToCurrent();
+            //CardMovement cm = cardTransform.GetComponent<CardMovement>();
+            //cm.UpdateOriginalToCurrent();
 
         }
 
