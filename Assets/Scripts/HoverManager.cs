@@ -7,6 +7,8 @@ public class HoverManager : MonoBehaviour
 {
     private GameObject currentlyHoveredCard = null;
 
+    private bool isDragging = false;
+
     void Update()
     {
         // If the pointer is over the Unity UI system...
@@ -40,14 +42,20 @@ public class HoverManager : MonoBehaviour
                 if (currentlyHoveredCard != null)
                 {
                     var oldMovement = currentlyHoveredCard.GetComponent<CardMovement>();
-                    if (oldMovement != null) oldMovement.ManualHoverExit();
+                    if (!isDragging)
+                    {
+                        if (oldMovement != null) oldMovement.ManualHoverExit();
+                    }
                 }
 
                 // If we have a new hovered card, tell it we entered
                 if (newHoveredCard != null)
                 {
                     var newMovement = newHoveredCard.GetComponent<CardMovement>();
-                    if (newMovement != null) newMovement.ManualHoverEnter();
+                    if (!isDragging)
+                    {
+                        if (newMovement != null) newMovement.ManualHoverEnter();
+                    }
                 }
 
                 currentlyHoveredCard = newHoveredCard;
@@ -64,5 +72,15 @@ public class HoverManager : MonoBehaviour
                 currentlyHoveredCard = null;
             }
         }
+    }
+
+    public void SetDragState(bool torf)
+    {
+        isDragging = torf; 
+    }
+
+    public bool GetDragState()
+    {
+        return isDragging;
     }
 }

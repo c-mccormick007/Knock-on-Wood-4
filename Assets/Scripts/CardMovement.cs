@@ -249,6 +249,8 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
 
         if (currentState == 2)
         {
+            HoverManager hoverManager = FindFirstObjectByType<HoverManager>();
+            hoverManager.SetDragState(true);
             Vector2 localPointerPosition;
             if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 canvas.GetComponent<RectTransform>(),
@@ -341,6 +343,9 @@ public class CardMovement : MonoBehaviour, IDragHandler, IEndDragHandler, IPoint
             TransitionToState0();
         }
         lastReorderedCard = null;
+
+        HoverManager hoverManager = FindFirstObjectByType<HoverManager>();
+        hoverManager.SetDragState(false);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
