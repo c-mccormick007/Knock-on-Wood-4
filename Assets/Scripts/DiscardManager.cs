@@ -46,6 +46,7 @@ public class DiscardManager : MonoBehaviour
         discardPileObjects.Add(card);
         rect.anchoredPosition = Vector2.zero;
         rect.localRotation = Quaternion.identity;
+        rect.localScale = new Vector3 (100, 100, 1);
 
         // 4. Move it visually on top
         //    (For UI) transforms, this ensures it’s the last sibling in the hierarchy
