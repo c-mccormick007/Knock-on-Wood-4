@@ -9,6 +9,7 @@ public class DeckManager : MonoBehaviour
     public List<Card> allCards = new List<Card>();
     public DeckPile deckPile;
     public HandManager HandManager;
+    public OppHandManager OppHandManager;
 
 
     private void Start()
@@ -41,9 +42,11 @@ public class DeckManager : MonoBehaviour
         yield return new WaitForSeconds(1f);
         // Once the deck is built, deal cards to the hand
         HandManager hand = FindFirstObjectByType<HandManager>();
+        OppHandManager oppHand = FindFirstObjectByType<OppHandManager>();
         for (int i = 0; i < 10; i++)
         {
             DrawCard(hand);
+            OppDrawCard(oppHand);
 
             yield return new WaitForSeconds(0.1f); // Add delay between dealing cards
         }
@@ -51,6 +54,21 @@ public class DeckManager : MonoBehaviour
 
         HandManager.SortHandBySuit();
         HandManager.UpdateHand();
+    }
+
+    public void OppDrawCard(OppHandManager handManager)
+    {
+        int lastIndex = deckPile.deck.Count - 1;
+        if (lastIndex < 0) return;
+
+        Card nextCard = deckPile.deck[lastIndex];
+        handManager.AddTopDeckCardToHand();
+
+        // Remove from the back
+        deckPile.deck.RemoveAt(lastIndex);
+
+        // Destroy the top child (last child) in deckPosition
+        //deckPile.DestroyTopCardObj();
     }
 
     public void DrawCard(HandManager handManager)

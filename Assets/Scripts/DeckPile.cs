@@ -39,7 +39,7 @@ public class DeckPile : MonoBehaviour
         rectTransform.DOLocalRotate(new Vector3(0,0,0), 0.9f).SetEase(Ease.OutQuad);
         rectTransform.DOScale(new Vector3(100, 100, 1), 0.9f).SetEase(Ease.OutQuad);
         deckObjects.Add(newCard);
-        gameState.AddCardToDeckState(card.GetCardId());
+        //gameState.AddCardToDeckState(card.GetCardId());
 
 
     }

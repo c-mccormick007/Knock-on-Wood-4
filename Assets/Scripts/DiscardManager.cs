@@ -46,7 +46,7 @@ public class DiscardManager : MonoBehaviour
 
         // 3. Add it to the discard pile list
         discardPileObjects.Add(card);
-        gameState.AddCardToDiscardState(cardDisplay.cardData.CardID);
+        //gameState.AddCardToDiscardState(cardDisplay.cardData.CardID);
         rect.anchoredPosition = Vector2.zero;
         rect.localRotation = Quaternion.identity;
         rect.localScale = new Vector3 (100, 100, 1);
