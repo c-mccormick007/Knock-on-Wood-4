@@ -110,7 +110,7 @@ public class GinGameState : NetworkBehaviour
         Debug.Log("Waiting for players to join...");
 
         // Wait until at least one player is present
-        yield return new WaitUntil(() => PlayerStates.Count > 0);
+        yield return new WaitUntil(() => PlayerStates.Count > 1);
 
         PlayerHands.Clear();
         foreach (var player in PlayerStates)
