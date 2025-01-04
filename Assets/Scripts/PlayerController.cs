@@ -1,18 +1,23 @@
 using Fusion;
 using UnityEngine;
 
-public class PlayerController : NetworkBehaviour
+public class PlayerController : SimulationBehaviour, IPlayerJoined
 {
-    [Networked] public int PlayerId { get; private set; }
-    [Networked] public string PlayerName { get; private set; }
+    public int PlayerId { get; private set; }
 
-    public void InitializePlayer(int id, string name)
+    public GameObject playerPrefab;  
+
+    public void PlayerJoined(PlayerRef player)
     {
-        if (HasStateAuthority)
+        if (player == Runner.LocalPlayer)
         {
-            PlayerId = id;
-            PlayerName = name;
-            Debug.Log($"Player {name} with ID {id} initialized.");
+            Runner.Spawn(playerPrefab, new Vector3(0, 1, 0), Quaternion.identity, player);
+            PlayerId = player.PlayerId;
+            Debug.Log($"Player with ID {PlayerId} initialized.");
+        }
+        else
+        {
+            Debug.Log($"Player with ID {PlayerId} initialized from a DIFFERENT SOURCE!!!!! GOOD JOB!!!!!!!! AND WE DIDNT SPAWN EXTRAS!!!! HOPEFULLY ");
         }
     }
 }
