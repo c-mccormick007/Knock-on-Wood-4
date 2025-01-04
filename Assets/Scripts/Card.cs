@@ -2,12 +2,28 @@ using UnityEngine;
 
 namespace BandCproductions
 {
-    [CreateAssetMenu(fileName = "New Card", menuName = "Card")]
     public class Card : ScriptableObject
     {
         public string cardName;
         public int rank;
         public string suit;
         public Sprite sprite;
+
+        [SerializeField] private int cardId;
+        public int CardID => cardId;
+
+        private void OnValidate()
+        {
+            if (cardId == 0)
+            {
+                cardId = GetInstanceID(); 
+            }
+        }
+
+        public int GetCardId()
+        {
+            return cardId;
+        }
+
     }
 }

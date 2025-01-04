@@ -10,6 +10,7 @@ public class DeckPile : MonoBehaviour
     public GameObject cardPrefab;
     public float deckOffset = -0.1f;
     public List<GameObject> deckObjects = new List<GameObject>();
+    public GinGameState gameState;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -38,6 +39,8 @@ public class DeckPile : MonoBehaviour
         rectTransform.DOLocalRotate(new Vector3(0,0,0), 0.9f).SetEase(Ease.OutQuad);
         rectTransform.DOScale(new Vector3(100, 100, 1), 0.9f).SetEase(Ease.OutQuad);
         deckObjects.Add(newCard);
+        gameState.AddCardToDeckState(card.GetCardId());
+
 
     }
 
@@ -51,6 +54,13 @@ public class DeckPile : MonoBehaviour
         Destroy(topCardTransform.gameObject);
     }
 
-
-
+    public List<int> ReturnDeckIdArray()
+    {
+        List<int> listData = new List<int>();
+        foreach (Card card in deck)
+        {
+            listData.Add(card.GetCardId());
+        }
+        return listData;
+    }
 }

@@ -12,6 +12,7 @@ public class DiscardManager : MonoBehaviour
     [Header("Highlight Colors")]
     [SerializeField] private Color normalColor = Color.white;
     [SerializeField] private Color highlightColor = new Color(1f, 1f, 1f, 1.3f);
+    public GinGameState gameState;
 
     /// <summary>
     /// Sets the highlight on the card to indicate it can be discarded.
@@ -40,10 +41,12 @@ public class DiscardManager : MonoBehaviour
         // 2. Parent it to the discard pile transform
         DOTween.Kill(card);
         RectTransform rect = card.GetComponent<RectTransform>();
+        CardDisplay cardDisplay = card.GetComponent<CardDisplay>(); 
         card.transform.SetParent(discardPileTransform, false);
 
         // 3. Add it to the discard pile list
         discardPileObjects.Add(card);
+        gameState.AddCardToDiscardState(cardDisplay.cardData.CardID);
         rect.anchoredPosition = Vector2.zero;
         rect.localRotation = Quaternion.identity;
         rect.localScale = new Vector3 (100, 100, 1);

@@ -13,6 +13,14 @@ public class DeckManager : MonoBehaviour
 
     private void Start()
     {
+        StartCoroutine(WaitForGameStart());
+    }
+
+    private IEnumerator WaitForGameStart()
+    {
+        yield return new WaitUntil(() => GameController.Instance != null && GameController.Instance.IsGameStarted());
+
+
         Card[] cards = Resources.LoadAll<Card>("Cards");
 
         allCards.AddRange(cards);
