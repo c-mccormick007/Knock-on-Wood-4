@@ -27,7 +27,7 @@ public class PlayerController : SimulationBehaviour, IPlayerJoined
         }
         else
         {
-            Debug.Log($"Player with ID {PlayerId} initialized from a DIFFERENT SOURCE!!!!! GOOD JOB!!!!!!!! AND WE DIDNT SPAWN EXTRAS!!!! HOPEFULLY ");
+            Debug.Log($"Player initialized from a DIFFERENT SOURCE!!!!! GOOD JOB!!!!!!!! AND WE DIDNT SPAWN EXTRAS!!!! HOPEFULLY ");
         }
     }
 }

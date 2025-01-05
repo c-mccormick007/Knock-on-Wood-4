@@ -1,13 +1,16 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class GameController : MonoBehaviour
 {
     public static GameController Instance;
 
-    [SerializeField] private Button startButton;
+    [SerializeField] private Button readyUpButton;
+    [SerializeField] private TextMeshProUGUI playerStatusText;
 
-    private bool gameStarted = false;
+    private bool isReady = false;
+    private bool isGameStarted = false;
 
     private void Awake()
     {
@@ -23,34 +26,28 @@ public class GameController : MonoBehaviour
 
     private void Start()
     {
-        PauseGame();
-
-        if (startButton != null)
-        {
-            startButton.onClick.AddListener(StartGame);
-        }
-        else
-        {
-            Debug.LogError("Start button is not assigned.");
-        }
+        readyUpButton.onClick.AddListener(OnReadyUpClicked);
     }
 
-    public void StartGame()
+    private void OnReadyUpClicked()
     {
-        gameStarted = true;
-        startButton.gameObject.SetActive(false);
-        Time.timeScale = 1.0f;
-        Debug.Log("Game Started!");
+        isReady = !isReady; // Toggle readiness state
+        readyUpButton.GetComponentInChildren<TextMeshProUGUI>().text = isReady ? "Cancel Ready" : "Ready Up";
+
+        // Notify GinGameState of player's readiness
+        GinGameState.Instance.SetPlayerReadyState(isReady);
     }
 
+    public void UpdatePlayerStatus(string status)
+    {
+        playerStatusText.text = status;
+    }
+    public void SetGameStarted()
+    {
+        isGameStarted = true;
+    }
     public bool IsGameStarted()
     {
-        return gameStarted;
-    }
-
-    private void PauseGame()
-    {
-        gameStarted = false;
-        Time.timeScale = 0; 
+        return isGameStarted;
     }
 }

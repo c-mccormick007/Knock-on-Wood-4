@@ -4,6 +4,7 @@ using System.Collections;
 using BandCproductions;
 using UnityEngine;
 using System;
+using System.Linq;
 using Fusion.Sockets;
 
 public class GinGameState : NetworkBehaviour
@@ -24,9 +25,15 @@ public class GinGameState : NetworkBehaviour
     [Capacity(2)]
     public NetworkDictionary<int, PlayerHand> PlayerHands { get; }
 
+    [Networked]
+    [Capacity(2)]
+    public NetworkDictionary<int, bool> PlayerReadyStates { get; }
+
+
 
 
     public static GinGameState Instance {get; private set;}
+    public GameController gameController; 
 
 
     public override void Spawned()
@@ -35,12 +42,12 @@ public class GinGameState : NetworkBehaviour
 
         var simBehaviour = Runner.GetBehaviour<PlayerController>();
         simBehaviour.Initialize(this);
-
+        /*
         if (HasStateAuthority)
         {
             InitializeDeck();
             StartCoroutine(WaitForPlayersThenDeal(10));
-        }
+        }*/
         //PlayerStates.Clear();
         //DeckState.Clear();
         //DiscardState.Clear();
@@ -105,21 +112,73 @@ public class GinGameState : NetworkBehaviour
         Debug.Log("Deck initialized and shuffled.");
     }
 
+    public void SetPlayerReadyState(bool isReady)
+    {
+        if (!HasStateAuthority) return;
+
+        var localPlayerId = Runner.LocalPlayer.PlayerId;
+
+        if (PlayerReadyStates.ContainsKey(localPlayerId))
+        {
+            PlayerReadyStates.Set(localPlayerId, isReady);
+        }
+        else
+        {
+            PlayerReadyStates.Add(localPlayerId, isReady);
+        }
+
+        Debug.Log($"Player {localPlayerId} is now {(isReady ? "ready" : "not ready")}.");
+        CheckAllPlayersReady();
+    }
+
+    private void CheckAllPlayersReady()
+    {
+        if (!HasStateAuthority) return;
+
+        foreach (var readyState in PlayerReadyStates)
+        {
+            if (!readyState.Value) // If any player is not ready
+            {
+                Debug.Log("Not all players are ready yet.");
+                return;
+            }
+        }
+
+        Debug.Log("All players are ready! Starting the game...");
+        gameController.SetGameStarted();
+        InitializeDeck();
+        StartCoroutine(WaitForPlayersThenDeal(10));
+    }
+
     private IEnumerator WaitForPlayersThenDeal(int cardsPerPlayer)
     {
         Debug.Log("Waiting for players to join...");
 
         // Wait until at least one player is present
-        yield return new WaitUntil(() => PlayerStates.Count > 1);
+        yield return new WaitUntil(() => Runner.ActivePlayers.Count() > 1);
 
         PlayerHands.Clear();
-        foreach (var player in PlayerStates)
+        foreach (var playerRef in Runner.ActivePlayers)
         {
-            PlayerHands.Add(player.Key, new PlayerHand());
+            if (!PlayerHands.ContainsKey(playerRef.PlayerId))
+            {
+                PlayerHands.Add(playerRef.PlayerId, new PlayerHand());
+            }
         }
 
         Debug.Log("Players joined. Dealing cards...");
         DealCards(cardsPerPlayer);
+    }
+
+    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
+    {
+        Debug.Log($"Player {player.PlayerId} joined.");
+
+        if (!PlayerHands.ContainsKey(player.PlayerId))
+        {
+            PlayerHands.Add(player.PlayerId, new PlayerHand());
+            DealCards(10);
+        }
     }
     public void DealCards(int cardsPerPlayer)
     {
